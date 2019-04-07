@@ -1,0 +1,171 @@
+{{extend '../layouts/layout.html'}}
+
+{{block 'body'}}
+<div class="container-fluid">
+  <div class="page-title">
+    <h1>管理员</h1>
+  </div>
+  <!-- 有错误信息时展示 -->
+  <!-- <div class="alert alert-danger">
+      <strong>错误！</strong>发生XXX错误
+    </div> -->
+  <div class="row">
+    <div class="col-md-8">
+      <div class="page-action">
+        <!-- show when multiple checked -->
+        <a id="btnLayer" class="btn btn-info btn-sm" href="javascript:;">添加新管理员</a>
+        <a id="btnBatch" class="btn btn-danger btn-sm" href="javascript:;">批量删除</a>
+      </div>
+      <table class="table table-striped table-bordered table-hover">
+        <thead>
+          <tr>
+            <th class="text-center" width="40"><input type="checkbox"></th>
+            <th class="text-center" width="80">头像</th>
+            <th>邮箱</th>
+            <th>昵称</th>
+            <th>状态</th>
+            <th class="text-center" width="100">操作</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- 存储获取到的每个管理员 -->
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{{/block}}
+
+{{block 'js'}}
+<script type="text/javascript" src="/assets/vendors/art-template/template-web.js"></script>
+<script src="/assets/vendors/layer/layer.js"></script>
+<script type="text/html" id="userList">
+{#each data#}
+  <tr>
+    <td class="text-center"><input class="dels" type="checkbox" value="{#$value.admin_id#}"></td>
+    <td class="text-center"><img class="avatar" src="{#$value.admin_pic#}"></td>
+    <td>{#$value.admin_email#}</td>
+    <td>{#$value.admin_nickname#}</td>
+    <td>{#$value.admin_state#}</td>
+    <td class="text-center">
+      <a id="editBtn" href="javascript:;" class="btn btn-default btn-xs" data-id="{#$value.admin_id#}">编辑</a>
+      <a id="delBtn" href="javascript:;" class="btn btn-danger btn-xs">删除</a>
+    </td>
+  </tr>
+{#/each#}
+</script>
+
+<script>
+  template.defaults.rules[1].test = /{#([@#]?)[ \t]*(\/?)([\w\W]*?)[ \t]*#}/;
+  $.ajax({
+    url: '/admin/user/getUsers',
+    type: 'get',
+    cache: false, //IE浏览器不进行缓存
+    dataType: 'json',
+    success: function (result) {
+      // console.log(result);
+      var str = template('userList', result);
+      //将拼接好的结果显示到 tbody 中
+      $('tbody').html(str);
+    }
+  });
+
+  //制作添加管理员弹窗
+  $('#btnLayer').click(function () {
+    layer.ready(function () {
+      layer.open({
+        type: 2,
+        title: '添加新管理员',
+        maxmin: true,
+        area: ['800px', '500px'],
+        content: '/admin/user/adduser',
+      });
+    });
+  });
+
+  //删除单个管理员
+  $('tbody').on('click', '#delBtn', function () {
+    let id = $(this).siblings('#editBtn').attr('data-id');
+    // console.log(id)
+    layer.confirm('确定要删除吗', function (index) {
+      console.log(index)
+      if (index) {
+        $.ajax({
+          url: '/admin/user/delUser',
+          type: 'get',
+          data: {
+            id: id
+          },
+          cache: false,
+          dataType: 'json',
+          success: function (result) {
+            // console.log(result.message)
+            $(this).parents('tr').remove();
+            layer.close(index);
+            location.reload(true);
+          }
+        });
+      };
+      layer.close(index);
+    });
+  });
+
+  //批量删除管理员
+  $('#btnBatch').click(function () {
+    //获取被选中项的id值
+    var checkboxList = $('.dels:checked');
+    //定义一个变量,用来储存id值组成的字符串
+    var str = '';
+    //对获取到的id伪数组进行遍历,并将每个id值组成条件到str上
+    checkboxList.each(function (index, item) {
+      str += item.value + ',';
+    });
+    //将字符串str最后的一个逗号去掉
+    str = str.slice(0, str.length - 1);
+    // console.log(str);
+    //发送请求将str发送给后端进行处理
+    layer.confirm('确定要执行多项操作吗', function (index) {
+      if (index) {
+        $.ajax({
+          url: '/admin/user/delusers',
+          type: 'post',
+          data: { ids: str },
+          dataType: 'json',
+          success: function (result) {
+            // console.log(result);
+            // alert(result.message);
+            layer.close(index);
+            layer.alert(result.message, function (index_two) {
+              if (result.code == 200) {
+                //循环获取到的id伪数组，再移除每个id值所对应的行
+                checkboxList.each(function () {
+                  $(this).parents('tr').remove();
+                  layer.close(index_two);
+                  location.reload(true);
+                });
+              };
+            })
+          }
+        });
+      }
+      layer.close(index);
+    })
+  });
+
+  //制作编辑管理员弹窗,并发送该编号管理员的id值
+  $('tbody').on('click', '#editBtn', function () {
+    let id = $(this).attr('data-id')
+    // console.log(id)
+    layer.ready(function () {
+      layer.open({
+        type: 2,
+        title: '编辑管理员',
+        maxmin: true,
+        area: ['800px', '500px'],
+        content: '/admin/user/edituser?id=' + id,
+      });
+    });
+  });
+
+</script>
+{{/block}}

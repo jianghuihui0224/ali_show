@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+  <meta charset="utf-8">
+  <title>Users &laquo; Admin</title>
+  <link rel="stylesheet" href="/assets/vendors/bootstrap/css/bootstrap.css">
+  <link rel="stylesheet" href="/assets/vendors/font-awesome/css/font-awesome.css">
+  <link rel="stylesheet" href="/assets/vendors/nprogress/nprogress.css">
+  <link rel="stylesheet" href="/assets/css/admin.css">
+  <script src="/assets/vendors/nprogress/nprogress.js"></script>
+  <style>
+    .error {
+      font-size: 10px;
+      color: red;
+    }
+    #fm .form-control {
+      font-size: 14px;
+      color: black;
+    }
+  </style>
+</head>
+<body>
+  <script>NProgress.start()</script>
+
+  <div class="container-fluid">
+    <!-- 有错误信息时展示 -->
+    <!-- <div class="alert alert-danger">
+        <strong>错误！</strong>发生XXX错误
+      </div> -->
+    <div class="row">
+      <div class="col-md-4">
+        <form id="fm">
+          <h2>添加新管理员</h2>
+          <div class="form-group">
+            <label for="email">邮箱</label>
+            <input id="email" class="form-control" name="email" type="email" placeholder="邮箱">
+          </div>
+          <div class="form-group">
+            <label for="nickname">昵称</label>
+            <input id="nickname" class="form-control" name="nickname" type="text" placeholder="昵称">
+          </div>
+          <div class="form-group">
+            <label for="password">密码</label>
+            <input id="password" class="form-control" name="password" type="text" placeholder="密码">
+          </div>
+          <div class="form-group">
+            <label for="state">状态</label>
+            <input name="state" type="radio" value="激活">激活
+            <input name="state" type="radio" value="禁用">禁用
+          </div>
+          <div class="form-group">
+            <button id="addBtn" class="btn btn-primary" type="submit">添加</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script src="/assets/vendors/jquery/jquery.js"></script>
+  <script src="/assets/vendors/bootstrap/js/bootstrap.js"></script>
+  <script src="/assets/vendors/validate/jquery.validate.js"></script>
+  <script>NProgress.done()</script>
+
+  <script>
+    $('#fm').validate({
+      rules: {
+        email: {
+          required: true,
+          email: true,
+          rangelength: [5, 20]
+        },
+        nickname: {
+          required: true,
+          rangelength: [3, 20]
+        },
+        password: {
+          required: true,
+          rangelength: [5, 20]
+        }
+      },
+      messages: {
+        email: {
+          required: '用户名不能为空',
+          email: '用户名必须为一个邮箱',
+          rangelength: '用户名的长度必须在5~20之间'
+        },
+        nickname: {
+          required: '昵称不能为空',
+          rangelength: '昵称的长度必须在3~20之间'
+        },
+        password: {
+          required: '密码不能为空',
+          rangelength: '密码的长度必须在5~20之间'
+        }
+      },
+      submitHandler: function () {
+        // console.log($('#fm').serialize())
+        $.ajax({
+          url: '/admin/user/adduserDel',
+          type: 'post',
+          data: $('#fm').serialize(),
+          dataType: 'json',
+          success: function (result) {
+            console.log(result.message)
+            //提示删除结果
+            parent.layer.alert(result.message, function (index_alert) {
+              //只要使用type=2弹出的另一个网页，获取该网页的索引
+              //就必须使用下列代码
+              var index = parent.layer.getFrameIndex(window.name);
+              // 当添加成功时，关闭弹出层，显示新添加的数据
+              if (result.code == 200) {
+                parent.layer.close(index);
+                //刷新父页面
+                parent.location.reload(true);
+                //关闭添加管理员页面
+                parent.layer.close(index_alert);
+              } else {
+                parent.layer.close(index);
+              }
+
+            });
+
+            //页面会直接刷新,不显示提示信息
+            // if (result.code === 200) {
+            //   parent.layer.alert(result.message);
+            //   parent.location.reload(true);
+            // }
+          }
+        })
+      }
+    });
+
+  </script>
+</body>
+
+</html>
