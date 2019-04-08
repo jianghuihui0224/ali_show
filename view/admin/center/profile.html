@@ -15,7 +15,7 @@
       <div class="col-sm-6">
         <label class="form-image">
           <input id="avatar" type="file">
-          <img src="/assets/img/default.png">
+          <img id="avatar_img" src="{{admin_pic}}">
           <i class="mask fa fa-upload"></i>
         </label>
       </div>
@@ -23,33 +23,28 @@
     <div class="form-group">
       <label for="email" class="col-sm-3 control-label">邮箱</label>
       <div class="col-sm-6">
-        <input id="email" class="form-control" name="email" type="type" value="w@zce.me" placeholder="邮箱" readonly>
+        <input id="email" class="form-control" name="email" type="type" value="{{admin_email}}" placeholder="邮箱"
+          readonly>
         <p class="help-block">登录邮箱不允许修改</p>
-      </div>
-    </div>
-    <div class="form-group">
-      <label for="slug" class="col-sm-3 control-label">别名</label>
-      <div class="col-sm-6">
-        <input id="slug" class="form-control" name="slug" type="type" value="zce" placeholder="slug">
-        <p class="help-block">https://zce.me/author/<strong>zce</strong></p>
       </div>
     </div>
     <div class="form-group">
       <label for="nickname" class="col-sm-3 control-label">昵称</label>
       <div class="col-sm-6">
-        <input id="nickname" class="form-control" name="nickname" type="type" value="汪磊" placeholder="昵称">
+        <input id="nickname" class="form-control" name="nickname" type="type" value="{{admin_nickname}}"
+          placeholder="昵称">
         <p class="help-block">限制在 2-16 个字符</p>
       </div>
     </div>
     <div class="form-group">
       <label for="bio" class="col-sm-3 control-label">简介</label>
       <div class="col-sm-6">
-        <textarea id="bio" class="form-control" placeholder="Bio" cols="30" rows="6">MAKE IT BETTER!</textarea>
+        <textarea id="bio" class="form-control" placeholder="Bio" cols="30" rows="6">{{admin_sign}}</textarea>
       </div>
     </div>
     <div class="form-group">
       <div class="col-sm-offset-3 col-sm-6">
-        <button type="submit" class="btn btn-primary">更新</button>
+        <button type="button" class="btn btn-primary">更新</button>
         <a class="btn btn-link" href="password-reset.html">修改密码</a>
       </div>
     </div>
@@ -58,15 +53,40 @@
 {{/block}}
 
 {{block 'js'}}
+<script src="/assets/vendors/jquery/jquery.min.js"></script>
+<script src="/assets/vendors/layer/layer.js"></script>
 <script>
-  $.ajax({
-    url: '/admin/center/getUser',
-    type: 'get',
-    dataType: 'json',
-    success: function (result) {
-      console.log(result)
-    }
-  })
+  $('#avatar').change(function () {
+    //1. 获取文件对象
+    var fileObj = document.getElementById('avatar').files[0];
+
+    //将文件对象追加到 FormData 中 
+    //（如果要上传的数据中有文件对象，就必须使用FormData）
+    // ① 实例化一个空的FormData
+    var fd = new FormData();
+    // ② 将文件对象存入fd
+    //fd.append('aaa', 123);
+    //fd.append('bbb', 'abc');
+    fd.append('avatar', fileObj);
+
+    //2. 发送Ajax请求并将新文件对象一起发送给后端 (/api/uploads)
+    $.ajax({
+      url: "/api/uploads",
+      type: "post",
+      data: fd,
+      dataType: 'json',
+      contentType: false,
+      processData: false,
+      success: function (result) {
+        // alert(result.message);
+        layer.alert(result.message, function (index) {
+          //修改头像img标签的src地址
+          $('#avatar_img').attr('src', result.path);
+          layer.close(index);
+        });
+      }
+    });
+  });
 
 </script>
 

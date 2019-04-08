@@ -9,6 +9,12 @@ const moment = require('moment');
 
 //显示管理员列表页 --- admin/user/users.html
 router.get('/admin/user/users', (req, res) => {
+    //判断isLogin是否为true,
+    //不为true时表明没有登录,不能浏览栏目列表页,跳转回登录页('admin/login')
+    if (req.session.isLogin != true) {
+        return res.redirect('/admin/login');
+    }
+    
     res.render(path.join(currentPath, 'view', 'admin/user/users.html'));
 })
 // 获取管理员列表数据

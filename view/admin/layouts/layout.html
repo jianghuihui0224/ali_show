@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
+
 <head>
   <meta charset="utf-8">
   <title>Dashboard &laquo; Admin</title>
@@ -10,6 +11,7 @@
   <script src="/assets/vendors/nprogress/nprogress.js"></script>
   {{block 'css'}} {{/block}}
 </head>
+
 <body>
   <script>NProgress.start()</script>
 
@@ -67,15 +69,28 @@
 
   <script src="/assets/vendors/jquery/jquery.js"></script>
   <script src="/assets/vendors/bootstrap/js/bootstrap.js"></script>
-  {{block 'js'}} 
+  <script src="/assets/vendors/layer/layer.js"></script>
+  {{block 'js'}}
   <script>
     $('#logout').click(function () {
+      if (layer.confirm('您确定退出系统吗?') != true) {
+        return false;
+      }
       $.ajax({
-        url: '/admin/layouts/layout',
+        url: '/admin/logout',
         type: 'post',
         dataType: 'json',
         success: function (result) {
-          console.log(result)
+          // console.log(result);
+          // alert(result.message);
+
+          //如果退出成功，则跳转回登录页
+          if (result.code == 200) {
+            layer.alert(result.message, function (index) {
+              location.href = '/admin/login';
+              // layer.close(index);
+            })
+          }
         }
       })
     })
@@ -84,4 +99,5 @@
   {{/block}}
   <script>NProgress.done()</script>
 </body>
+
 </html>

@@ -9,8 +9,8 @@ const moment = require('moment');
 
 //显示管理员列表页 --- admin/user/users.html
 router.get('/admin/center/profile', (req, res) => {
-    res.render(path.join(currentPath, 'view', 'admin/center/profile.html'));
-})
+    res.render(path.join(currentPath, 'view', 'admin/center/profile.html'),req.session.userInfo);
+});
 
 
 //导出路由模块
