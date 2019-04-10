@@ -34,10 +34,11 @@ router.post('/admin/checkLogin', (req, res) => {
 });
 
 //退出登录
-router.post('/admin/logout', (req, res) => {
+router.get('/admin/logout', (req, res) => {
     //回调函数中的参数是错误对象
     //如果清除session失败，则err是一个错误对象
     //如果清除session成功，则err是null
+    // console.log(123)
     req.session.destroy(function (err) {
         if (err) {
             //退出失败

@@ -23,6 +23,10 @@ app.engine('html', require('express-art-template'));
 const bp = require('body-parser');
 app.use(bp.urlencoded({extended:false}));
 
+//因为首页不需要进行用户是否登录判断,所以需要放在session中间件前面
+const router_font = require('./routers/router_font.js');
+app.use(router_font);
+
 //加载express-session模块,注册为中间件
 //注册该中间件之后， req对象才有了 session子对象
 const session = require('express-session');
@@ -34,24 +38,41 @@ app.use(session({
 //将检测session的中间件函数进行注册
 app.use(checkSession);
 
-//加载路由模块(栏目列表路由)，在注册为中间件
-const router_font = require('./routers/router_font.js');
-app.use(router_font);
+const fs = require('fs');
+const path = require('path');
+fs.readdir(path.join(__dirname, 'routers'), (err, result) => {
+    if (err) {
+        return console.log(err);
+    }
 
-const router_cate = require('./routers/router_cate.js');
-app.use(router_cate);
+    //读取成功，循环将这些模块加载，再注册成中间件,只能用let声明i,否则会覆盖
+    for (let i = 0; i < result.length; i++) {
+        let router = require(path.join(__dirname, 'routers', result[i]));
+        app.use(router);
+    }
+})
+// //加载路由模块(栏目列表路由)，在注册为中间件
+//改良版为上部分代码
+// const router_cate = require('./routers/router_cate.js');
+// app.use(router_cate);
 
-const router_login = require('./routers/router_login.js');
-app.use(router_login);
+// const router_login = require('./routers/router_login.js');
+// app.use(router_login);
 
-const router_center = require('./routers/router_center.js');
-app.use(router_center);
+// const router_center = require('./routers/router_center.js');
+// app.use(router_center);
 
-const router_user = require('./routers/router_user.js');
-app.use(router_user);
+// const router_user = require('./routers/router_user.js');
+// app.use(router_user);
+
+// const router_post = require('./routers/router_post.js')
+// app.use(router_post);
+
+// const router_pic= require('./routers/router_pic.js')
+// app.use(router_pic);
 
 //将 api.js 注册为中间件
-const api = require('./api.js');
+const api = require('./routers/api.js');
 app.use(api);
 
 function checkSession (req, res, next) {

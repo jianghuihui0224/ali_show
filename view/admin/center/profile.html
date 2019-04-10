@@ -16,6 +16,7 @@
         <label class="form-image">
           <input id="avatar" type="file">
           <img id="avatar_img" src="{{admin_pic}}">
+          <input id="avatar_hidden" type="hidden" name="pic">
           <i class="mask fa fa-upload"></i>
         </label>
       </div>
@@ -39,7 +40,8 @@
     <div class="form-group">
       <label for="bio" class="col-sm-3 control-label">简介</label>
       <div class="col-sm-6">
-        <textarea id="bio" class="form-control" placeholder="Bio" cols="30" rows="6">{{admin_sign}}</textarea>
+        <textarea id="bio" name="sign" class="form-control" placeholder="Bio" cols="30"
+          rows="6">{{admin_sign}}</textarea>
       </div>
     </div>
     <div class="form-group">
@@ -56,17 +58,15 @@
 <script src="/assets/vendors/jquery/jquery.min.js"></script>
 <script src="/assets/vendors/layer/layer.js"></script>
 <script>
+  //文件类型需要用change事件和使用FormData
   $('#avatar').change(function () {
-    //1. 获取文件对象
+    //1. 获取文件对象,files是一个属性,返回值为伪数组
     var fileObj = document.getElementById('avatar').files[0];
 
-    //将文件对象追加到 FormData 中 
-    //（如果要上传的数据中有文件对象，就必须使用FormData）
-    // ① 实例化一个空的FormData
+    //将文件对象追加到 FormData 中
+    // 1. 实例化一个空的FormData
     var fd = new FormData();
-    // ② 将文件对象存入fd
-    //fd.append('aaa', 123);
-    //fd.append('bbb', 'abc');
+    // 2. 将文件对象存入fd
     fd.append('avatar', fileObj);
 
     //2. 发送Ajax请求并将新文件对象一起发送给后端 (/api/uploads)
@@ -75,19 +75,34 @@
       type: "post",
       data: fd,
       dataType: 'json',
-      contentType: false,
-      processData: false,
+      contentType: false,//只要使用formdata就需要设置
+      processData: false,//只要使用formdata就需要设置
       success: function (result) {
         // alert(result.message);
         layer.alert(result.message, function (index) {
           //修改头像img标签的src地址
           $('#avatar_img').attr('src', result.path);
+          //同时将新地址写入图片对应的隐藏域,这样才能把新修改的头像的路径获取到
+          $('#avatar_hidden').val(result.path);
           layer.close(index);
         });
       }
     });
   });
 
+  //更新按钮发送请求
+  $('.btn-primary').click(function () {
+    $.ajax({
+      url: '/api/center/personal',
+      type: 'post',
+      data: $('.form-horizontal').serialize(),
+      dataType: 'json',
+      success: function (result) {
+        layer.alert(result.message); 
+      }
+    })
+  })
+ 
 </script>
 
 {{/block}}

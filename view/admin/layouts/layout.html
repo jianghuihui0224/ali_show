@@ -42,14 +42,14 @@
           <i class="fa fa-thumb-tack"></i>文章<i class="fa fa-angle-right"></i>
         </a>
         <ul id="menu-posts" class="collapse in">
-          <li><a href="/admin/post/posts.html">所有文章</a></li>
-          <li><a href="/admin/post/addpost.html">写文章</a></li>
+          <li><a href="/admin/post/posts">所有文章</a></li>
+          <li><a href="/admin/post/addpost">写文章</a></li>
           <li><a href="/admin/cate/addcate">添加新栏目</a></li>
           <li class="active"><a href="/admin/cate/cate">栏目列表</a></li>
         </ul>
       </li>
       <li>
-        <a href="/admin/comment/comments.html"><i class="fa fa-comments"></i>评论</a>
+        <a href="/admin/comment/comments"><i class="fa fa-comments"></i>评论</a>
       </li>
       <li>
         <a href="/admin/user/users"><i class="fa fa-users"></i>用户</a>
@@ -59,9 +59,9 @@
           <i class="fa fa-cogs"></i>设置<i class="fa fa-angle-right"></i>
         </a>
         <ul id="menu-settings" class="collapse">
-          <li><a href="/admin/other/nav-menus.html">导航菜单</a></li>
-          <li><a href="/admin/other/slides.html">图片轮播</a></li>
-          <li><a href="/admin/other/settings.html">网站设置</a></li>
+          <li><a href="/admin/other/nav-menus">导航菜单</a></li>
+          <li><a href="/admin/other/slides">图片轮播</a></li>
+          <li><a href="/admin/other/settings">网站设置</a></li>
         </ul>
       </li>
     </ul>
@@ -70,33 +70,30 @@
   <script src="/assets/vendors/jquery/jquery.js"></script>
   <script src="/assets/vendors/bootstrap/js/bootstrap.js"></script>
   <script src="/assets/vendors/layer/layer.js"></script>
-  {{block 'js'}}
+  {{block 'js'}} {{/block}}
   <script>
+    //点击退出按钮的事件
     $('#logout').click(function () {
-      if (layer.confirm('您确定退出系统吗?') != true) {
-        return false;
-      }
       $.ajax({
         url: '/admin/logout',
-        type: 'post',
+        type: 'get',
         dataType: 'json',
+        // contentType: false,
+        // processData: false,
         success: function (result) {
-          // console.log(result);
-          // alert(result.message);
-
-          //如果退出成功，则跳转回登录页
+          console.log(result.message);
+          //如果退出成功，就跳转到登录页面
           if (result.code == 200) {
             layer.alert(result.message, function (index) {
               location.href = '/admin/login';
-              // layer.close(index);
-            })
-          }
+            });
+          };
         }
-      })
-    })
+      });
+    });
 
   </script>
-  {{/block}}
+  
   <script>NProgress.done()</script>
 </body>
 

@@ -6,7 +6,7 @@ const router = express.Router();
 
 //3. 加载其他所需模块
 const path = require('path');
-const db = require('./db.js');
+const db = require('../db.js');
 const moment = require('moment');
 
 //检测登录信息
@@ -68,7 +68,7 @@ let storage = multer.diskStorage({
  
 let upload = multer({ storage: storage })
 
-//头像文件上传
+//头像.轮播图文件上传
 router.post('/api/uploads', upload.single('avatar'), (req, res) => {
     res.send({code:200, message:"上传成功", path: '\\' + req.file.path});
 })
@@ -231,7 +231,7 @@ router.post('/api/other/slides', (req, res) => {
     })
 })
 
-
+//添加新的轮播图图片
 router.post('/admin/other/addSildes', (req, res) => {
     const data = {
         pic_url: req.body.image_hidden,
@@ -252,8 +252,19 @@ router.post('/admin/other/addSildes', (req, res) => {
                 return res.send({code:202, message:"获取新轮播图数据失败"});
             }
 
-            res.send({code:200, message:"添加新轮播图成功", data: data});
+            res.send({code:200, message:"添加新轮播图成功", data: data, dataId: result.insertId});
         })
+    })
+})
+
+router.post('/api/other/delSildes', (req, res) => {
+    const id = req.body.id;
+    const sql = 'delete from ali_pic where pic_id=?';
+    db.query(sql, id, (err, result) => {
+        if (err || result.affectedRows != 1) {
+            return res.send({code: 201, message: '删除失败'});
+        }
+        res.send({code: 200, message: '删除成功'});
     })
 })
 
